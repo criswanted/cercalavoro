@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CercaLavoro — Lanciano e Abruzzo</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0d0f14;--surface:#161a24;--surface2:#1e2436;--border:#2a3050;--accent:#4fffb0;--accent2:#4f8fff;--text:#e8eaf0;--muted:#6b7394}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+  body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+    background-image:linear-gradient(rgba(79,255,176,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(79,255,176,.03) 1px,transparent 1px);
+    background-size:40px 40px}
+  .wrap{max-width:860px;margin:0 auto;padding:40px 20px;position:relative;z-index:1}
+  header{text-align:center;margin-bottom:36px}
+  .logo{font-family:'Syne',sans-serif;font-size:2.6rem;font-weight:800;letter-spacing:-1px;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .logo em{-webkit-text-fill-color:var(--text);opacity:.35;font-style:normal}
+  .tagline{color:var(--muted);font-size:.88rem;margin-top:6px}
+  .panel{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:26px;margin-bottom:24px;box-shadow:0 8px 40px rgba(0,0,0,.4)}
+  .fields{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+  .f{flex:1;min-width:140px}
+  .f label{display:block;font-size:.7rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px}
+  .f input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:10px 13px;color:var(--text);font-family:inherit;font-size:.93rem;outline:none;transition:border-color .2s}
+  .f input:focus{border-color:var(--accent)}
+  .f input[type=range]{padding:0;margin-top:10px;accent-color:var(--accent);cursor:pointer}
+  .chips-label{font-size:.7rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;display:flex;align-items:center;gap:7px}
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 1.5s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  .chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:18px}
+  .chip{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 13px;font-size:.8rem;color:var(--text);cursor:pointer;transition:all .15s;font-family:inherit}
+  .chip:hover{border-color:var(--accent);color:var(--accent);background:rgba(79,255,176,.05)}
+  .chip.on{background:rgba(79,255,176,.12);border-color:var(--accent);color:var(--accent)}
+  .btn{width:100%;padding:13px;background:linear-gradient(135deg,var(--accent),#00d4a0);color:#0d0f14;font-family:'Syne',sans-serif;font-weight:700;font-size:.97rem;border:none;border-radius:12px;cursor:pointer;transition:opacity .2s,transform .1s;letter-spacing:.5px}
+  .btn:hover{opacity:.88}
+  .btn:active{transform:scale(.99)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+
+  /* STATUS */
+  .status{text-align:center;padding:50px 20px;color:var(--muted);display:none}
+  .spinner{display:inline-block;width:22px;height:22px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin-bottom:12px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .src-badges{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:10px}
+  .src-badge{padding:3px 10px;border-radius:20px;font-size:.75rem;font-weight:600;color:#fff;opacity:.35;transition:opacity .3s}
+  .src-badge.done{opacity:1}
+
+  /* RESULTS */
+  .res-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+  .res-title{font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:700}
+  .res-count{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:3px 13px;font-size:.8rem;color:var(--accent);font-weight:600}
+  .filter-bar{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+  .filter-bar input,.filter-bar select{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:7px 11px;color:var(--text);font-family:inherit;font-size:.83rem;outline:none}
+  .filter-bar input{flex:1;min-width:160px}
+  .filter-bar select option{background:var(--surface)}
+
+  /* JOB CARDS */
+  #jobList{display:flex;flex-direction:column;gap:8px}
+  .job{background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:14px 16px;
+    display:grid;grid-template-columns:36px 1fr auto;gap:3px 12px;align-items:start;
+    text-decoration:none;color:var(--text);transition:border-color .2s,transform .15s;
+    animation:up .25s ease both}
+  @keyframes up{from{opacity:0;transform:translateY(5px)}}
+  .job:hover{border-color:rgba(79,255,176,.3);transform:translateY(-1px)}
+  .job-badge{grid-row:1/3;width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:800;color:#fff;font-family:'Syne',sans-serif;flex-shrink:0;margin-top:1px}
+  .job-title{font-weight:600;font-size:.9rem;line-height:1.3}
+  .job-date{font-size:.75rem;color:var(--muted);white-space:nowrap;padding-top:2px}
+  .job-date.new{color:var(--accent);font-weight:600}
+  .job-meta{font-size:.77rem;color:var(--muted);margin-top:2px}
+  .job-meta span+span::before{content:' · '}
+
+  .empty{text-align:center;padding:50px 20px;color:var(--muted)}
+  .err{background:rgba(255,100,100,.08);border:1px solid rgba(255,100,100,.2);border-radius:10px;padding:10px 14px;font-size:.82rem;color:#f87171;margin-bottom:12px;display:none}
+  @media(max-width:520px){.logo{font-size:2rem}.job{grid-template-columns:32px 1fr}.job-date{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="logo">cerca<em>.</em>lavoro</div>
+  <p class="tagline">Annunci reali da Indeed · Subito.it · InfoJobs — ordinati per data</p>
+</header>
+
+<div class="panel">
+  <div class="fields">
+    <div class="f">
+      <label>Parola chiave (opzionale)</label>
+      <input id="kw" type="text" placeholder="es. cuoco, operaio, impiegato…">
+    </div>
+    <div class="f" style="max-width:190px">
+      <label>Città</label>
+      <input id="loc" type="text" value="Lanciano">
+    </div>
+    <div class="f" style="max-width:160px">
+      <label>Raggio: <span id="kmv">30</span> km</label>
+      <input id="km" type="range" min="5" max="100" step="5" value="30" oninput="document.getElementById('kmv').textContent=this.value">
+    </div>
+  </div>
+  <div class="chips-label"><span class="dot"></span>Suggerimenti rapidi</div>
+  <div class="chips" id="chips"></div>
+  <button class="btn" id="btn" onclick="search()">🔍 Cerca Annunci</button>
+</div>
+
+<div id="err" class="err"></div>
+
+<div class="status" id="status">
+  <div class="spinner"></div>
+  <div id="statusTxt">Ricerca in corso…</div>
+  <div class="src-badges">
+    <span class="src-badge" id="b-indeed" style="background:#2164f3">Indeed</span>
+    <span class="src-badge" id="b-subito" style="background:#e5202e">Subito.it</span>
+    <span class="src-badge" id="b-infojobs" style="background:#ff6600">InfoJobs</span>
+  </div>
+</div>
+
+<div id="results" style="display:none">
+  <div class="res-header">
+    <div class="res-title">Risultati</div>
+    <div class="res-count" id="cnt">0 annunci</div>
+  </div>
+  <div class="filter-bar">
+    <input type="text" id="ft" placeholder="🔎 Filtra per titolo…" oninput="filter()">
+    <select id="fs" onchange="filter()">
+      <option value="">Tutte le fonti</option>
+      <option>Indeed</option><option>Subito.it</option><option>InfoJobs</option>
+    </select>
+  </div>
+  <div id="jobList"></div>
+</div>
+
+</div>
+<script>
+const COLORS={"Indeed":"#2164f3","Subito.it":"#e5202e","InfoJobs":"#ff6600"};
+const SHORTS={"Indeed":"IN","Subito.it":"SB","InfoJobs":"IJ"};
+const KWS=["operaio","magazziniere","commesso","cameriere","cuoco","autista","barista","impiegato","cassiere","meccanico","elettricista","badante","receptionist","contabile","estetista","parrucchiere","infermiere","muratore","assistente","addetto vendita"];
+
+let all=[];
+
+// chips
+(()=>{
+  const c=document.getElementById('chips');
+  KWS.forEach(kw=>{
+    const b=document.createElement('button');
+    b.className='chip';b.textContent=kw;
+    b.onclick=()=>{
+      const inp=document.getElementById('kw');
+      const cur=inp.value.split(',').map(s=>s.trim()).filter(Boolean);
+      const i=cur.indexOf(kw);
+      if(i>=0){cur.splice(i,1);b.classList.remove('on');}
+      else{cur.push(kw);b.classList.add('on');}
+      inp.value=cur.join(', ');
+    };
+    c.appendChild(b);
+  });
+})();
+
+function fmtDate(iso){
+  if(!iso) return {l:'—',n:false};
+  const d=new Date(iso), diff=Math.floor((Date.now()-d)/3600000);
+  if(diff<1)  return{l:'🟢 Adesso',n:true};
+  if(diff<24) return{l:`🟢 ${diff}h fa`,n:true};
+  if(diff<48) return{l:'🟡 Ieri',n:true};
+  const days=Math.floor(diff/24);
+  if(days<7)  return{l:`${days}g fa`,n:false};
+  if(days<30) return{l:`${Math.floor(days/7)} sett. fa`,n:false};
+  return{l:d.toLocaleDateString('it-IT'),n:false};
+}
+
+async function search(){
+  const kw=document.getElementById('kw').value.trim();
+  const loc=document.getElementById('loc').value.trim()||'Lanciano';
+  const btn=document.getElementById('btn');
+  btn.disabled=true;
+  document.getElementById('status').style.display='block';
+  document.getElementById('results').style.display='none';
+  document.getElementById('err').style.display='none';
+  ['b-indeed','b-subito','b-infojobs'].forEach(id=>document.getElementById(id).classList.remove('done'));
+
+  try{
+    const res=await fetch(`/api/jobs?keyword=${encodeURIComponent(kw)}&location=${encodeURIComponent(loc)}`);
+    const data=await res.json();
+    // mark all done
+    ['b-indeed','b-subito','b-infojobs'].forEach(id=>document.getElementById(id).classList.add('done'));
+    all=data;
+    render(all);
+  }catch(e){
+    const err=document.getElementById('err');
+    err.style.display='block';
+    err.textContent='⚠️ Errore durante la ricerca. Riprova tra qualche secondo.';
+  }
+
+  document.getElementById('status').style.display='none';
+  btn.disabled=false;
+}
+
+function render(jobs){
+  const list=document.getElementById('jobList');
+  const sec=document.getElementById('results');
+  sec.style.display='block';
+  upd(jobs.length);
+  if(!jobs.length){
+    list.innerHTML='<div class="empty">Nessun annuncio trovato.<br>Prova parole chiave diverse o una città più grande.</div>';
+    return;
+  }
+  list.innerHTML=jobs.map((j,i)=>{
+    const c=COLORS[j.fonte]||'#555';
+    const s=SHORTS[j.fonte]||j.fonte.substring(0,2).toUpperCase();
+    const{l,n}=fmtDate(j.data);
+    return`<a class="job" href="${j.link}" target="_blank" rel="noopener"
+      style="animation-delay:${Math.min(i,20)*25}ms"
+      data-f="${j.fonte}" data-t="${(j.titolo+' '+j.azienda+' '+j.luogo).toLowerCase()}">
+      <div class="job-badge" style="background:${c}">${s}</div>
+      <div class="job-title">${j.titolo}</div>
+      <div class="job-date${n?' new':''}">${l}</div>
+      <div class="job-meta"><span>${j.azienda}</span><span>${j.luogo}</span></div>
+    </a>`;
+  }).join('');
+  sec.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function filter(){
+  const q=document.getElementById('ft').value.toLowerCase();
+  const s=document.getElementById('fs').value;
+  let n=0;
+  document.querySelectorAll('.job').forEach(c=>{
+    const ok=(!q||c.dataset.t.includes(q))&&(!s||c.dataset.f===s);
+    c.style.display=ok?'':'none';
+    if(ok)n++;
+  });
+  upd(n);
+}
+
+function upd(n){document.getElementById('cnt').textContent=n+(n===1?' annuncio':' annunci');}
+
+['kw','loc'].forEach(id=>{
+  document.getElementById(id).addEventListener('keydown',e=>{if(e.key==='Enter')search();});
+});
+</script>
+</body>
+</html>
