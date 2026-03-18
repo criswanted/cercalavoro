@@ -41,7 +41,7 @@ def jobs():
     try:
         url = f"https://it.indeed.com/jobs?q={requests.utils.quote(keyword)}&l={requests.utils.quote(location)}&sort=date"
         r = requests.get(url, headers=HEADERS, timeout=10)
-        soup = BeautifulSoup(r.text, "lxml")
+        soup = BeautifulSoup(r.text, "html.parser")
         for card in soup.select("div.job_seen_beacon")[:15]:
             title = card.select_one("h2.jobTitle span")
             company = card.select_one("span.companyName")
@@ -64,7 +64,7 @@ def jobs():
     try:
         url = f"https://www.subito.it/annunci-italia/offerte-lavoro/?q={requests.utils.quote(keyword)}&r={requests.utils.quote(location.lower())}&sort=datedesc"
         r = requests.get(url, headers=HEADERS, timeout=10)
-        soup = BeautifulSoup(r.text, "lxml")
+        soup = BeautifulSoup(r.text, "html.parser")
         for card in soup.select("article.item-card")[:15]:
             title = card.select_one("h2,h3")
             date = card.select_one("time,[class*='date']")
