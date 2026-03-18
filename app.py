@@ -37,7 +37,6 @@ def jobs():
     location = request.args.get("location", "Lanciano")
     results = []
 
-    # Indeed
     try:
         url = f"https://it.indeed.com/jobs?q={requests.utils.quote(keyword)}&l={requests.utils.quote(location)}&sort=date"
         r = requests.get(url, headers=HEADERS, timeout=10)
@@ -60,7 +59,6 @@ def jobs():
     except Exception as e:
         print(f"Indeed error: {e}")
 
-    # Subito
     try:
         url = f"https://www.subito.it/annunci-italia/offerte-lavoro/?q={requests.utils.quote(keyword)}&r={requests.utils.quote(location.lower())}&sort=datedesc"
         r = requests.get(url, headers=HEADERS, timeout=10)
@@ -72,3 +70,48 @@ def jobs():
             loc = card.select_one("[class*='city'],[class*='location']")
             results.append({
                 "fonte": "Subito.it",
+                "titolo": title.get_text(strip=True) if title else "—",
+                "azienda": "—",
+                "luogo": loc.get_text(strip=True) if loc else location,
+                "data": parse_date(date.get_text(strip=True) if date else ""),
+                "data_raw": date.get_text(strip=True) if date else "",
+                "link": link["href"] if link else "#",
+            })
+    except Exception as e:
+        print(f"Subito error: {e}")
+
+    try:
+        kw_slug = keyword.lower().replace(" ", "-") or "offerte-lavoro"
+        loc_slug = location.lower().replace(" ", "-")
+        url = f"https://www.infojobs.it/offerte-lavoro/{kw_slug}/{loc_slug}/index.xhtml?sortBy=date"
+        r = requests.get(url, headers=HEADERS, timeout=10)
+        soup = BeautifulSoup(r.text, "html.parser")
+        for card in soup.select("li.ij-OfferCardContent,div.ij-OfferCard")[:15]:
+            title = card.select_one("a.ij-OfferCardContent-description-title-link,h2 a")
+            company = card.select_one("span.ij-OfferCardContent-description-info-company")
+            loc = card.select_one("span.ij-OfferCardContent-description-info-location")
+            date = card.select_one("span.ij-OfferCardContent-description-info-date,time")
+            href = title["href"] if title and title.has_attr("href") else "#"
+            if not href.startswith("http"):
+                href = "https://www.infojobs.it" + href
+            results.append({
+                "fonte": "InfoJobs",
+                "titolo": title.get_text(strip=True) if title else "—",
+                "azienda": company.get_text(strip=True) if company else "—",
+                "luogo": loc.get_text(strip=True) if loc else location,
+                "data": parse_date(date.get_text(strip=True) if date else ""),
+                "data_raw": date.get_text(strip=True) if date else "",
+                "link": href,
+            })
+    except Exception as e:
+        print(f"InfoJobs error: {e}")
+
+    results.sort(key=lambda x: x.get("data", ""), reverse=True)
+    return jsonify(results)
+
+@app.route("/")
+def index():
+    return app.send_static_file("index.html")
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=10000)
